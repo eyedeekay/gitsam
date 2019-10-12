@@ -133,8 +133,15 @@ func NewGitSAMTunnel(host, port string) (*GitSAMTunnel, error) {
 //NewGitSAMTunnelFromOptions makes a new SAM forwarder with default options, accepts host:port arguments
 func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunnel, error) {
 	var s GitSAMTunnel
-	s.SAMForwarder = &samforwarder.SAMForwarder{}
-	s.OptPage = &eephttpd.EepHttpd{}
+	var err error
+	s.SAMForwarder, err = samforwarder.NewSAMForwarderFromOptions()
+	if err != nil {
+		return nil, err
+	}
+	s.OptPage, err = eephttpd.NewEepHttpdFromOptions()
+	if err != nil {
+		return nil, err
+	}
 	s.Conf = gitkit.Config{}
 	s.SSH = &gitkit.SSH{}
 	log.Println("Initializing gitsam")
