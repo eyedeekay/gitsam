@@ -96,8 +96,8 @@ func SetHost(s string) func(*GitSAMTunnel) error {
 	}
 }
 
-//SetPort sets the port of the service to forward
-func SetPort(s string) func(*GitSAMTunnel) error {
+//SetSSHPort sets the port of the service to forward
+func SetSSHPort(s string) func(*GitSAMTunnel) error {
 	return func(c *GitSAMTunnel) error {
 		port, err := strconv.Atoi(s)
 		if err != nil {

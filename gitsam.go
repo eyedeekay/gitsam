@@ -1,6 +1,9 @@
 package gitsam
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -8,6 +11,7 @@ import (
 	"github.com/eyedeekay/eephttpd"
 	"github.com/eyedeekay/sam-forwarder/interface"
 	"github.com/eyedeekay/sam-forwarder/tcp"
+	"github.com/gliderlabs/ssh"
 	"github.com/sosedoff/gitkit"
 )
 
@@ -26,11 +30,17 @@ type GitSAMTunnel struct {
 var err error
 
 func (f *GitSAMTunnel) LookupKey() (*gitkit.PublicKey, error) {
-	key, err := ioutil.ReadFile(f.PubKeyPath)
+	textkey, err := ioutil.ReadFile(f.PubKeyPath)
 	if err != nil {
 		return nil, err
 	}
-	return &gitkit.PublicKey{Id: string(key)}, nil
+	key, _, _, _, err := ssh.ParseAuthorizedKey(textkey)
+	if err != nil {
+		return nil, err
+	}
+	hash := sha256.Sum256(key.Marshal)
+	print := base64.StdEncoding.EncodeToString(hash[:])
+	return &gitkit.PublicKey{Fingerprint: print}, nil
 }
 
 func (f *GitSAMTunnel) GetType() string {
@@ -90,7 +100,7 @@ func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 
 //NewGitSAMTunnel makes a new SAM forwarder with default options, accepts host:port arguments
 func NewGitSAMTunnel(host, port string) (*GitSAMTunnel, error) {
-	return NewGitSAMTunnelFromOptions(SetHost(host), SetPort(port))
+	return NewGitSAMTunnelFromOptions(SetHost(host), SetSSHPort(port))
 }
 
 //NewGitSAMTunnelFromOptions makes a new SAM forwarder with default options, accepts host:port arguments
