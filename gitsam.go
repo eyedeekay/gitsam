@@ -3,7 +3,6 @@ package gitsam
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -24,12 +23,11 @@ type GitSAMTunnel struct {
 	OptPage    *eephttpd.EepHttpd
 	PubKeyPath string
 	SecurePath string
-	up         bool
 }
 
 var err error
 
-func (f *GitSAMTunnel) LookupKey() (*gitkit.PublicKey, error) {
+func (f *GitSAMTunnel) LookupKey(content string) (*gitkit.PublicKey, error) {
 	textkey, err := ioutil.ReadFile(f.PubKeyPath)
 	if err != nil {
 		return nil, err
@@ -38,7 +36,7 @@ func (f *GitSAMTunnel) LookupKey() (*gitkit.PublicKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	hash := sha256.Sum256(key.Marshal)
+	hash := sha256.Sum256(key.Marshal())
 	print := base64.StdEncoding.EncodeToString(hash[:])
 	return &gitkit.PublicKey{Fingerprint: print}, nil
 }
@@ -93,6 +91,7 @@ func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 	s.SAMForwarder = f.(*samforwarder.SAMForwarder)
 	s.Conf.KeyDir = s.SecurePath
 	s.SSH = gitkit.NewSSH(s.Conf)
+	s.SSH.PublicKeyLookupFunc = s.LookupKey
 	s.up = true
 	log.Println("Finished putting tunnel up")
 	return s, nil
