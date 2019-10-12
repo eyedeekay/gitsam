@@ -49,7 +49,7 @@ var (
 	outBackupQuantity  = flag.Int("ob", 1, "Set outbound tunnel backup quantity(0 to 5)")
 	iniFile            = flag.String("f", "none", "Use an ini file for configuration")
 	authkeys           = flag.String("pk", "./id_rsa.pub", "Path to the authorized users SSH public key")
-	servkeys           = flag.String("sk", "", "Path to the directory with the private keys used to authenticate the server")
+	servkeys           = flag.String("sk", "../.gitsam_secure", "Path to the directory with the private keys used to authenticate the server")
 )
 
 func main() {
