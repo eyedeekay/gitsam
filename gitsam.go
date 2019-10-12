@@ -3,6 +3,7 @@ package gitsam
 import (
 	"io/ioutil"
 	"log"
+	"path/filepath"
 
 	"github.com/eyedeekay/eephttpd"
 	"github.com/eyedeekay/sam-forwarder/interface"
@@ -38,6 +39,7 @@ func (f *GitSAMTunnel) GetType() string {
 
 func (f *GitSAMTunnel) ServeParent() {
 	log.Println("Starting eepsite server", f.Base32())
+	go f.OptPage.Serve()
 	if err = f.SAMForwarder.Serve(); err != nil {
 		f.Cleanup()
 	}
@@ -45,12 +47,12 @@ func (f *GitSAMTunnel) ServeParent() {
 
 //Serve starts the SAM connection and and forwards the local host:port to i2p
 func (f *GitSAMTunnel) Serve() error {
-	go f.ServeParent()
 	if f.Up() {
-		log.Println("Starting web server", f.Target())
-		/*if err := http.ListenAndServe(f.Target(), f); err != nil {
+		go f.ServeParent()
+		log.Println("Starting ssh server", f.Target())
+		if err := f.SSH.ListenAndServe(f.Target()); err != nil {
 			return err
-		}*/
+		}
 	}
 	return nil
 }
@@ -75,8 +77,11 @@ func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 	if e != nil {
 		return nil, e
 	}
+	if s.SecurePath == "" {
+		s.SecurePath = filepath.Dir(s.Conf.Dir)
+	}
 	s.SAMForwarder = f.(*samforwarder.SAMForwarder)
-	s.Conf.KeyDir = s.Conf.Dir + "../.ssh"
+	s.Conf.KeyDir = s.SecurePath
 	s.SSH = gitkit.NewSSH(s.Conf)
 	s.up = true
 	log.Println("Finished putting tunnel up")

@@ -18,6 +18,22 @@ func SetFilePath(s string) func(*GitSAMTunnel) error {
 	}
 }
 
+//SetPubKeyPath sets the path to the user's SSH public keys for read/write access.
+func SetPubKeyPath(s string) func(*GitSAMTunnel) error {
+	return func(c *GitSAMTunnel) error {
+		c.PubKeyPath = s
+		return nil
+	}
+}
+
+//SetSecurePath sets the path to place the private keys for server authentication.
+func SetSecurePath(s string) func(*GitSAMTunnel) error {
+	return func(c *GitSAMTunnel) error {
+		c.SecurePath = s
+		return nil
+	}
+}
+
 //SetType sets the type of the forwarder server
 func SetType(s string) func(*GitSAMTunnel) error {
 	return func(c *GitSAMTunnel) error {
