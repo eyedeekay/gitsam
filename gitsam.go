@@ -78,7 +78,7 @@ func (f *GitSAMTunnel) Close() error {
 }
 
 func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
-	if !s.up {
+	if !s.Up() {
 		log.Println("Started putting tunnel up")
 	}
 	f, e := s.SAMForwarder.Load()
@@ -92,7 +92,6 @@ func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 	s.Conf.KeyDir = s.SecurePath
 	s.SSH = gitkit.NewSSH(s.Conf)
 	s.SSH.PublicKeyLookupFunc = s.LookupKey
-	s.up = true
 	log.Println("Finished putting tunnel up")
 	return s, nil
 }
