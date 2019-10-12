@@ -1,23 +1,33 @@
 package gitsam
 
 import (
+	"io/ioutil"
 	"log"
 
+	"github.com/eyedeekay/eephttpd"
 	"github.com/eyedeekay/sam-forwarder/interface"
 	"github.com/eyedeekay/sam-forwarder/tcp"
-    "github.com/eyedeekay/eephttpd"
+	"github.com/sosedoff/gitkit"
 )
 
 //GitSAMTunnel is a structure which automatically configured the forwarding of
 //a local service to i2p over the SAM API.
 type GitSAMTunnel struct {
 	*samforwarder.SAMForwarder
-    OptPage     *eephttpd.EepHttpd
-	//ServeDir string
-	up       bool
+	OptPage    *eephttpd.EepHttpd
+	PubKeyPath string
+	up         bool
 }
 
 var err error
+
+func (f *GitSAMTunnel) LookupKey() (*gitkit.PublicKey, error) {
+	key, err := ioutil.ReadFile(f.PubKeyPath)
+	if err != nil {
+		return nil, err
+	}
+	return &gitkit.PublicKey{Id: string(key)}, nil
+}
 
 func (f *GitSAMTunnel) GetType() string {
 	return "gitsam"
@@ -77,7 +87,7 @@ func NewGitSAMTunnel(host, port string) (*GitSAMTunnel, error) {
 func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunnel, error) {
 	var s GitSAMTunnel
 	s.SAMForwarder = &samforwarder.SAMForwarder{}
-    s.OptPage = &eephttpd.EepHttpd{}
+	s.OptPage = &eephttpd.EepHttpd{}
 	log.Println("Initializing gitsam")
 	for _, o := range opts {
 		if err := o(&s); err != nil {
