@@ -29,6 +29,30 @@ type GitSAMTunnel struct {
 
 var err error
 
+func (s *GitSAMTunnel) AssureGitIgnore() error {
+	fp, err := filepath.Abs(s.PubKeyPath)
+	if err != nil {
+		return err
+	}
+	if filepath.Dir(fp) == s.Conf.Dir {
+		if b, e := ioutil.ReadFile(s.Conf.Dir + "/.gitignore"); e != nil {
+			ioutil.WriteFile(s.Conf.Dir+"/.gitignore", []byte(s.PubKeyPath), 0644)
+		} else {
+			if !strings.Contains(string(b), s.PubKeyPath) {
+				f, err := os.OpenFile(s.Conf.Dir+"/.gitignore", os.O_APPEND|os.O_WRONLY, 0600)
+				if err != nil {
+					return err
+				}
+				defer f.Close()
+				if _, err = f.WriteString(s.PubKeyPath); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (f *GitSAMTunnel) LookupKey(content string) (*gitkit.PublicKey, error) {
 	textkey, err := ioutil.ReadFile(f.PubKeyPath)
 	if err != nil {
@@ -126,28 +150,4 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 		return nil, e
 	}
 	return l.(*GitSAMTunnel), nil
-}
-
-func (s *GitSAMTunnel) AssureGitIgnore() error {
-	fp, err := filepath.Abs(s.PubKeyPath)
-	if err != nil {
-		return err
-	}
-	if filepath.Dir(fp) == s.Conf.Dir {
-		if b, e := ioutil.ReadFile(s.Conf.Dir + "/.gitignore"); e != nil {
-			ioutil.WriteFile(s.Conf.Dir+"/.gitignore", []byte(s.PubKeyPath), 0644)
-		} else {
-			if !strings.Contains(string(b), s.PubKeyPath) {
-				f, err := os.OpenFile(s.Conf.Dir+"/.gitignore", os.O_APPEND|os.O_WRONLY, 0600)
-				if err != nil {
-					return err
-				}
-				defer f.Close()
-				if _, err = f.WriteString(s.PubKeyPath); err != nil {
-					return err
-				}
-			}
-		}
-	}
-	return nil
 }
