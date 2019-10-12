@@ -5,7 +5,9 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/eyedeekay/eephttpd"
 	"github.com/eyedeekay/sam-forwarder/interface"
@@ -92,6 +94,9 @@ func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 	s.Conf.KeyDir = s.SecurePath
 	s.SSH = gitkit.NewSSH(s.Conf)
 	s.SSH.PublicKeyLookupFunc = s.LookupKey
+	if err := s.AssureGitIgnore(); err != nil {
+		return nil, err
+	}
 	log.Println("Finished putting tunnel up")
 	return s, nil
 }
@@ -121,4 +126,28 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 		return nil, e
 	}
 	return l.(*GitSAMTunnel), nil
+}
+
+func (s *GitSAMTunnel) AssureGitIgnore() error {
+	fp, err := filepath.Abs(s.PubKeyPath)
+	if err != nil {
+		return err
+	}
+	if filepath.Dir(fp) == s.Conf.Dir {
+		if b, e := ioutil.ReadFile(s.Conf.Dir + "/.gitignore"); e != nil {
+			ioutil.WriteFile(s.Conf.Dir+"/.gitignore", []byte(s.PubKeyPath), 0644)
+		} else {
+			if !strings.Contains(string(b), s.PubKeyPath) {
+				f, err := os.OpenFile(s.Conf.Dir+"/.gitignore", os.O_APPEND|os.O_WRONLY, 0600)
+				if err != nil {
+					return err
+				}
+				defer f.Close()
+				if _, err = f.WriteString(s.PubKeyPath); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
