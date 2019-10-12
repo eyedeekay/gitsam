@@ -14,8 +14,11 @@ import (
 //a local service to i2p over the SAM API.
 type GitSAMTunnel struct {
 	*samforwarder.SAMForwarder
+	*gitkit.SSH
+	Conf       gitkit.Config
 	OptPage    *eephttpd.EepHttpd
 	PubKeyPath string
+	SecurePath string
 	up         bool
 }
 
@@ -73,6 +76,8 @@ func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 		return nil, e
 	}
 	s.SAMForwarder = f.(*samforwarder.SAMForwarder)
+	s.Conf.KeyDir = s.Conf.Dir + "../.ssh"
+	s.SSH = gitkit.NewSSH(s.Conf)
 	s.up = true
 	log.Println("Finished putting tunnel up")
 	return s, nil
@@ -88,6 +93,8 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 	var s GitSAMTunnel
 	s.SAMForwarder = &samforwarder.SAMForwarder{}
 	s.OptPage = &eephttpd.EepHttpd{}
+	s.Conf = gitkit.Config{}
+	s.SSH = &gitkit.SSH{}
 	log.Println("Initializing gitsam")
 	for _, o := range opts {
 		if err := o(&s); err != nil {
