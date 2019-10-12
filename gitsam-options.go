@@ -105,6 +105,20 @@ func SetPort(s string) func(*GitSAMTunnel) error {
 		}
 		if port < 65536 && port > -1 {
 			c.SAMForwarder.Config().TargetPort = s
+			return nil
+		}
+		return fmt.Errorf("Invalid port")
+	}
+}
+
+//SetPagePort sets the port of the service to forward
+func SetPagePort(s string) func(*GitSAMTunnel) error {
+	return func(c *GitSAMTunnel) error {
+		port, err := strconv.Atoi(s)
+		if err != nil {
+			return fmt.Errorf("Invalid TCP Server Target Port %s; non-number ", s)
+		}
+		if port < 65536 && port > -1 {
 			c.OptPage.Config().TargetPort = s
 			return nil
 		}
