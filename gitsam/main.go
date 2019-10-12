@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"flag"
 	"log"
-	"strconv"
 )
 
 import (
@@ -118,6 +117,7 @@ func main() {
 		gitsam.SetServeDir(*directory),
 		gitsam.SetPubKeyPath(*authkeys),
 		gitsam.SetSecurePath(*servkeys),
+		gitsam.SetKeyFile(*servkeys),
 	)
 	if err != nil {
 		log.Fatal(err)
