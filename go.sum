@@ -42,6 +42,8 @@ github.com/eyedeekay/checki2cp v0.0.0-20190711025647-bb48a7ebe468/go.mod h1:pvT9
 github.com/eyedeekay/eephttpd v0.0.0-20190903000420-52f5a8485a4e/go.mod h1:wFPQsNBnY95LkuujFEZARo7slafRwoF0D97FFHBoZro=
 github.com/eyedeekay/eephttpd v0.0.5 h1:Q6Mzq75f/xzZ6DBTdbtBavrVMR2oqTdbdyisfEwRcgw=
 github.com/eyedeekay/eephttpd v0.0.5/go.mod h1:wH8LmIF07sBCn8dzyKSgiYNB2FYxiO35+fAqBOsqQDw=
+github.com/eyedeekay/eephttpd v0.0.7 h1:+oviAox4Q+Bt2plubA0D/U1AJOMD/lU3m/g4lep/sBw=
+github.com/eyedeekay/eephttpd v0.0.7/go.mod h1:4dvXqu1YyWyzv/KjNwcHHkj0fhP3jBxHUf9+0Q0jp0I=
 github.com/eyedeekay/go-i2cp v0.0.0-20190716135428-6d41bed718b0 h1:rnn9OlD/3+tATEZNuiMR1C84O5CX8bZL2qqgttprKrw=
 github.com/eyedeekay/go-i2cp v0.0.0-20190716135428-6d41bed718b0/go.mod h1:+P0fIhkqIYjo7exMJRTlSteRMbRyHbiBiKw+YlPWk+c=
 github.com/eyedeekay/goSam v0.1.1-0.20190814204230-d4c9b8c57dd6 h1:+5eM/MhjGMWCGQCCqn9pb1bmvoRewweWhOaE6fA7kZ0=

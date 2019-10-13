@@ -10,8 +10,10 @@ fmt:
 
 USER_GH=eyedeekay
 packagename=gitsam
-VERSION=0.0.91
+VERSION=0.0.92
 
 tag:
 	gothub release -s $(GITHUB_TOKEN) -u $(USER_GH) -r $(packagename) -t v$(VERSION) -d "I2P Tunnel Management tool for Go applications"
 
+mod:
+	go get -u github.com/$(USER_GH)/$(packagename)@v$(VERSION)
