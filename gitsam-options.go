@@ -469,22 +469,6 @@ func SetAccessList(s []string) func(*GitSAMTunnel) error {
 	}
 }
 
-//SetTargetForPort sets the port of the GitSAMTunnel's SAM bridge using a string
-/*func SetTargetForPort443(s string) func(*GitSAMTunnel) error {
-	return func(c *GitSAMTunnel) error {
-		port, err := strconv.Atoi(s)
-		if err != nil {
-			return fmt.Errorf("Invalid Target Port %s; non-number ", s)
-		}
-		if port < 65536 && port > -1 {
-			c.SAMForwarder.Config().TargetForPort443 = s
-			return nil
-		}
-		return fmt.Errorf("Invalid port")
-	}
-}
-*/
-
 //SetKeyFile sets
 func SetKeyFile(s string) func(*GitSAMTunnel) error {
 	return func(c *GitSAMTunnel) error {
