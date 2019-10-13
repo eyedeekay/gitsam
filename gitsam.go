@@ -228,8 +228,8 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 	if s.OptPage, err = i2ptunhelper.NewEepHttpdFromConf(&conf); err != nil {
 		return nil, err
 	}
-	log.Println("Options loaded", s.Print())
 	l, e := s.Load()
+    //log.Println("Options loaded", s.Print())
 	if e != nil {
 		return nil, e
 	}
