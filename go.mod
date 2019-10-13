@@ -8,10 +8,13 @@ require (
 	github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239 // indirect
 	github.com/creack/pty v1.1.9 // indirect
 	github.com/cryptix/go v1.5.0 // indirect
+	github.com/cryptix/goSam v0.1.0 // indirect
 	github.com/d5/tengo v1.24.3 // indirect
-	github.com/eyedeekay/eephttpd v0.0.3
+	github.com/eyedeekay/eephttpd v0.0.4
+	github.com/eyedeekay/httptunnel v0.0.0-20190831071439-0ff3d5f798fb // indirect
+	github.com/eyedeekay/i2pdig v0.0.0-20180718204453-a67cb46e2e5f // indirect
 	github.com/eyedeekay/outproxy v0.0.0-20190913044809-33f1668ccb7d // indirect
-	github.com/eyedeekay/sam-forwarder v0.0.0-20190928041036-d2f767dbe008
+	github.com/eyedeekay/sam-forwarder v0.32.0
 	github.com/gliderlabs/ssh v0.2.2
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/gorilla/sessions v1.2.0 // indirect

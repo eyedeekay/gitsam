@@ -44,6 +44,8 @@ github.com/eyedeekay/eephttpd v0.0.2 h1:13fRLMlsD22tPBGo3ENhSOHS7PmrQ/33BtSqwXcd
 github.com/eyedeekay/eephttpd v0.0.2/go.mod h1:wFPQsNBnY95LkuujFEZARo7slafRwoF0D97FFHBoZro=
 github.com/eyedeekay/eephttpd v0.0.3 h1:Dn7Ip7Ily2w95ApHyq6vQ2I3WekOmejvlCPMwq6aqHo=
 github.com/eyedeekay/eephttpd v0.0.3/go.mod h1:wFPQsNBnY95LkuujFEZARo7slafRwoF0D97FFHBoZro=
+github.com/eyedeekay/eephttpd v0.0.4 h1:Fe3WD5bvkC9eKTFsqEIPAheGvYLgUnyul5lQj+bw7h0=
+github.com/eyedeekay/eephttpd v0.0.4/go.mod h1:wFPQsNBnY95LkuujFEZARo7slafRwoF0D97FFHBoZro=
 github.com/eyedeekay/goSam v0.1.1-0.20190814204230-d4c9b8c57dd6 h1:+5eM/MhjGMWCGQCCqn9pb1bmvoRewweWhOaE6fA7kZ0=
 github.com/eyedeekay/goSam v0.1.1-0.20190814204230-d4c9b8c57dd6/go.mod h1:kGTfZrncJ4CwMX3d1qA6bcMJTOcuTbOqgWg7WrFNAQ0=
 github.com/eyedeekay/httptunnel v0.0.0-20190814204746-0081636585cd/go.mod h1:fD9CRejMpwLs7GC4mu5re58JInU/8Foi3b4hn0NT0a4=
