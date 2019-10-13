@@ -27,6 +27,7 @@ var (
 	host               = flag.String("a", "127.0.0.1", "hostname to serve on")
 	port               = flag.String("p", "7882", "port to serve locally on")
 	pageport           = flag.String("pp", "7883", "port to serve read-only pages on")
+	launchpage         = flag.Bool("lp", true, "launch a \"Page\" on read-only HTTP branch")
 	samhost            = flag.String("sh", "127.0.0.1", "sam host to connect to")
 	samport            = flag.String("sp", "7656", "sam port to connect to")
 	directory          = flag.String("d", "./", "the directory of static files to host(default ./www)")
@@ -119,6 +120,7 @@ func main() {
 		gitsam.SetPubKeyPath(*authkeys),
 		gitsam.SetSecurePath(*servkeys),
 		gitsam.SetKeyFile(*servkeys),
+		gitsam.SetMakePage(*launchpage),
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -28,29 +28,80 @@ type GitSAMTunnel struct {
 	PubKeyPath string
 	SecurePath string
 	PagePort   string
+	page       bool
 	up         bool
+	prex       bool
 }
 
 var err error
 
+func (s *GitSAMTunnel) PRBytes() []byte {
+	r := "#!/bin/sh"
+	r += "GIT_WORK_TREE=" + s.GitConf.Dir + " git checkout -f"
+	return []byte(r)
+}
+
+func FileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	if info != nil {
+		return !info.IsDir()
+	}
+	return false
+}
+
+func (s *GitSAMTunnel) AssurePostRecieve() error {
+	if !s.page {
+		return nil
+	}
+	if err := os.MkdirAll(s.GitConf.Dir+"/hooks", 0755); err != nil {
+		return err
+	} else {
+		if !FileExists(s.GitConf.Dir + "/hooks/post-recieve") {
+			if err := ioutil.WriteFile(s.GitConf.Dir+"/hooks/post-recieve", s.PRBytes(), 0755); err != nil {
+				s.prex = true
+				return err
+			}
+		}
+		return nil
+	}
+}
+
+func (s *GitSAMTunnel) DeletePostRecieve() error {
+	if s.prex {
+		if err := os.Remove(s.GitConf.Dir + "/hooks/post-recieve"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *GitSAMTunnel) AssureGitIgnore() error {
-	fp, err := filepath.Abs(s.PubKeyPath)
+	PubKeyPath, err := filepath.Rel(s.GitConf.Dir, s.PubKeyPath)
 	if err != nil {
 		return err
 	}
-	if filepath.Dir(fp) == s.GitConf.Dir {
-		if b, e := ioutil.ReadFile(s.GitConf.Dir + "/.gitignore"); e != nil {
-			ioutil.WriteFile(s.GitConf.Dir+"/.gitignore", []byte(s.PubKeyPath), 0644)
+	if filepath.Dir(s.PubKeyPath) == s.GitConf.Dir {
+		if FileExists(s.GitConf.Dir + "/.gitignore") {
+			if bytes, err := ioutil.ReadFile(s.GitConf.Dir + "/.gitignore"); err == nil {
+				if !strings.Contains(string(bytes), s.PubKeyPath) {
+					f, err := os.OpenFile(s.GitConf.Dir+"/.gitignore", os.O_APPEND|os.O_WRONLY, 0644)
+					if err != nil {
+						return err
+					}
+					defer f.Close()
+					if _, err = f.WriteString(PubKeyPath); err != nil {
+						return err
+					}
+				}
+			} else {
+				return err
+			}
 		} else {
-			if !strings.Contains(string(b), s.PubKeyPath) {
-				f, err := os.OpenFile(s.GitConf.Dir+"/.gitignore", os.O_APPEND|os.O_WRONLY, 0600)
-				if err != nil {
-					return err
-				}
-				defer f.Close()
-				if _, err = f.WriteString(s.PubKeyPath); err != nil {
-					return err
-				}
+			if err := ioutil.WriteFile(s.GitConf.Dir+"/.gitignore", []byte(PubKeyPath), 0644); err != nil {
+				return err
 			}
 		}
 	}
@@ -109,6 +160,9 @@ func (f *GitSAMTunnel) Up() bool {
 
 //Close shuts the whole thing down.
 func (f *GitSAMTunnel) Close() error {
+	if err := f.DeletePostRecieve(); err != nil {
+		return err
+	}
 	return f.SAMForwarder.Close()
 }
 
@@ -131,6 +185,9 @@ func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 	if err := s.AssureGitIgnore(); err != nil {
 		return nil, err
 	}
+	if err := s.AssurePostRecieve(); err != nil {
+		return nil, err
+	}
 	log.Println("Finished putting tunnel up")
 	s.up = true
 	return s, nil
@@ -150,6 +207,8 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 	//s.OptPage.SAMForwarder = &samforwarder.SAMForwarder{}
 	s.GitConf = gitkit.Config{}
 	s.SSH = &gitkit.SSH{}
+	s.page = true
+	s.up = false
 	log.Println("Initializing gitsam")
 	for _, o := range opts {
 		if err := o(&s); err != nil {

@@ -2,6 +2,12 @@
 build:
 	cd gitsam && go build
 
+try: build
+	./gitsam/gitsam
+
+fmt:
+	find . -name '*.go' -exec gofmt -w {} \;
+
 USER_GH=eyedeekay
 packagename=gitsam
 VERSION=0.0.1

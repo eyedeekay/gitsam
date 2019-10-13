@@ -2,7 +2,7 @@ package gitsam
 
 import (
 	"fmt"
-    "os"
+	"os"
 	"path/filepath"
 	"strconv"
 )
@@ -13,8 +13,10 @@ type Option func(*GitSAMTunnel) error
 //SetFilePath sets the path to save the config file at.
 func SetFilePath(s string) func(*GitSAMTunnel) error {
 	return func(c *GitSAMTunnel) error {
-		c.SAMForwarder.Config().FilePath = s
-		// c.OptPage.Config().FilePath = s
+		var err error
+		if c.SAMForwarder.Config().FilePath, err = filepath.Abs(s); err != nil {
+			return err
+		}
 		return nil
 	}
 }
@@ -22,7 +24,10 @@ func SetFilePath(s string) func(*GitSAMTunnel) error {
 //SetPubKeyPath sets the path to the user's SSH public keys for read/write access.
 func SetPubKeyPath(s string) func(*GitSAMTunnel) error {
 	return func(c *GitSAMTunnel) error {
-		c.PubKeyPath = s
+		var err error
+		if c.PubKeyPath, err = filepath.Abs(s); err != nil {
+			return err
+		}
 		return nil
 	}
 }
@@ -30,7 +35,10 @@ func SetPubKeyPath(s string) func(*GitSAMTunnel) error {
 //SetSecurePath sets the path to place the private keys for server authentication.
 func SetSecurePath(s string) func(*GitSAMTunnel) error {
 	return func(c *GitSAMTunnel) error {
-		c.SecurePath = s
+		var err error
+		if c.SecurePath, err = filepath.Abs(s); err != nil {
+			return err
+		}
 		return nil
 	}
 }
@@ -84,6 +92,14 @@ func SetSaveFile(b bool) func(*GitSAMTunnel) error {
 	return func(c *GitSAMTunnel) error {
 		c.SAMForwarder.Config().SaveFile = b
 		// c.OptPage.Config().SaveFile = b
+		return nil
+	}
+}
+
+//SetMakePage tells the application to update the page
+func SetMakePage(b bool) func(*GitSAMTunnel) error {
+	return func(c *GitSAMTunnel) error {
+		c.page = b
 		return nil
 	}
 }
@@ -477,9 +493,9 @@ func SetKeyFile(s string) func(*GitSAMTunnel) error {
 		if c.SAMForwarder.Config().KeyFilePath, err = filepath.Abs(s); err != nil {
 			return err
 		}
-        if err = os.MkdirAll(c.SAMForwarder.Config().KeyFilePath); err != nil {
-            return err
-        }
+		if err = os.MkdirAll(c.SAMForwarder.Config().KeyFilePath, 0644); err != nil {
+			return err
+		}
 		return nil
 	}
 }
