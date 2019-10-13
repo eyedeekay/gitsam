@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239 // indirect
 	github.com/d5/tengo v1.24.3 // indirect
-	github.com/eyedeekay/eephttpd v0.0.0-20190913044830-2b66920823c7
+	github.com/eyedeekay/eephttpd v0.0.1
 	github.com/eyedeekay/sam-forwarder v0.0.0-20190928041036-d2f767dbe008
 	github.com/gliderlabs/ssh v0.2.2
 	github.com/satori/go.uuid v1.2.0 // indirect

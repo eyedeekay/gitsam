@@ -11,6 +11,7 @@ import (
 
 	"github.com/eyedeekay/eephttpd"
 	"github.com/eyedeekay/sam-forwarder/config"
+	"github.com/eyedeekay/sam-forwarder/config/helpers"
 	"github.com/eyedeekay/sam-forwarder/interface"
 	"github.com/eyedeekay/sam-forwarder/tcp"
 	"github.com/gliderlabs/ssh"
@@ -26,6 +27,8 @@ type GitSAMTunnel struct {
 	OptPage    *eephttpd.EepHttpd
 	PubKeyPath string
 	SecurePath string
+	PagePort   string
+	up         bool
 }
 
 var err error
@@ -73,9 +76,16 @@ func (f *GitSAMTunnel) GetType() string {
 }
 
 func (f *GitSAMTunnel) ServeParent() {
-	log.Println("Starting eepsite server", f.Base32())
-	go f.OptPage.Serve()
+	log.Println("Starting eepssh server", f.Base32())
 	if err = f.SAMForwarder.Serve(); err != nil {
+		log.Println(err)
+		f.Cleanup()
+	}
+}
+
+func (f *GitSAMTunnel) ServePage() {
+	if err = f.OptPage.Serve(); err != nil {
+		log.Println(err)
 		f.Cleanup()
 	}
 }
@@ -83,6 +93,7 @@ func (f *GitSAMTunnel) ServeParent() {
 //Serve starts the SAM connection and and forwards the local host:port to i2p
 func (f *GitSAMTunnel) Serve() error {
 	if f.Up() {
+		go f.ServePage()
 		go f.ServeParent()
 		log.Println("Starting ssh server", f.Target())
 		if err := f.SSH.ListenAndServe(f.Target()); err != nil {
@@ -93,10 +104,7 @@ func (f *GitSAMTunnel) Serve() error {
 }
 
 func (f *GitSAMTunnel) Up() bool {
-	if f.SAMForwarder.Up() {
-		return true
-	}
-	return false
+	return f.up
 }
 
 //Close shuts the whole thing down.
@@ -115,6 +123,7 @@ func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 	if s.SecurePath == "" {
 		s.SecurePath = filepath.Dir(s.GitConf.Dir)
 	}
+	s.Conf.ServeDirectory = s.GitConf.Dir
 	s.SAMForwarder = f.(*samforwarder.SAMForwarder)
 	s.GitConf.KeyDir = s.SecurePath
 	s.SSH = gitkit.NewSSH(s.GitConf)
@@ -123,6 +132,7 @@ func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 		return nil, err
 	}
 	log.Println("Finished putting tunnel up")
+	s.up = true
 	return s, nil
 }
 
@@ -137,7 +147,7 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 	s.SAMForwarder = &samforwarder.SAMForwarder{}
 	s.Conf = &i2ptunconf.Conf{}
 	s.OptPage = &eephttpd.EepHttpd{}
-	s.OptPage.Conf = &i2ptunconf.Conf{}
+	//s.OptPage.SAMForwarder = &samforwarder.SAMForwarder{}
 	s.GitConf = gitkit.Config{}
 	s.SSH = &gitkit.SSH{}
 	log.Println("Initializing gitsam")
@@ -147,6 +157,14 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 		}
 	}
 	s.SAMForwarder.Config().SaveFile = true
+	var err error
+	conf := *s.Conf
+	conf.CloseIdleTime = 6000000
+	conf.TargetPort = s.PagePort
+	conf.TunName = s.ID() + "-eephttpd"
+	if s.OptPage, err = i2ptunhelper.NewEepHttpdFromConf(&conf); err != nil {
+		return nil, err
+	}
 	log.Println("Options loaded", s.Print())
 	l, e := s.Load()
 	if e != nil {

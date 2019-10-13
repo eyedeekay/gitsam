@@ -84,6 +84,7 @@ func main() {
 	config.UseCompression = config.GetUseCompression(*useCompression, true)
 	config.ReduceIdle = config.GetReduceOnIdle(*reduceIdle, true)
 	config.ReduceIdleTime = config.GetReduceIdleTime(*reduceIdleTime, 600000)
+	config.CloseIdleTime = config.GetCloseIdleTime(*reduceIdleTime, 600000)
 	config.ReduceIdleQuantity = config.GetReduceIdleQuantity(*reduceIdleQuantity, 2)
 	config.AccessListType = config.GetAccessListType(*accessListType, "none")
 	config.Type = config.GetTypes(false, false, false, "server")
