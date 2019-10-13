@@ -270,7 +270,7 @@ func SetServeDir(s string) func(*GitSAMTunnel) error {
 	return func(c *GitSAMTunnel) error {
 		var err error
 		c.OptPage.ServeDir, err = filepath.Abs(s)
-		c.Conf.Dir = c.OptPage.ServeDir
+		c.GitConf.Dir = c.OptPage.ServeDir
 		if err != nil {
 			return err
 		}

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/eyedeekay/eephttpd"
+	"github.com/eyedeekay/sam-forwarder/config"
 	"github.com/eyedeekay/sam-forwarder/interface"
 	"github.com/eyedeekay/sam-forwarder/tcp"
 	"github.com/gliderlabs/ssh"
@@ -21,7 +22,7 @@ import (
 type GitSAMTunnel struct {
 	*samforwarder.SAMForwarder
 	*gitkit.SSH
-	Conf       gitkit.Config
+	GitConf    gitkit.Config
 	OptPage    *eephttpd.EepHttpd
 	PubKeyPath string
 	SecurePath string
@@ -34,12 +35,12 @@ func (s *GitSAMTunnel) AssureGitIgnore() error {
 	if err != nil {
 		return err
 	}
-	if filepath.Dir(fp) == s.Conf.Dir {
-		if b, e := ioutil.ReadFile(s.Conf.Dir + "/.gitignore"); e != nil {
-			ioutil.WriteFile(s.Conf.Dir+"/.gitignore", []byte(s.PubKeyPath), 0644)
+	if filepath.Dir(fp) == s.GitConf.Dir {
+		if b, e := ioutil.ReadFile(s.GitConf.Dir + "/.gitignore"); e != nil {
+			ioutil.WriteFile(s.GitConf.Dir+"/.gitignore", []byte(s.PubKeyPath), 0644)
 		} else {
 			if !strings.Contains(string(b), s.PubKeyPath) {
-				f, err := os.OpenFile(s.Conf.Dir+"/.gitignore", os.O_APPEND|os.O_WRONLY, 0600)
+				f, err := os.OpenFile(s.GitConf.Dir+"/.gitignore", os.O_APPEND|os.O_WRONLY, 0600)
 				if err != nil {
 					return err
 				}
@@ -112,11 +113,11 @@ func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 		return nil, e
 	}
 	if s.SecurePath == "" {
-		s.SecurePath = filepath.Dir(s.Conf.Dir)
+		s.SecurePath = filepath.Dir(s.GitConf.Dir)
 	}
 	s.SAMForwarder = f.(*samforwarder.SAMForwarder)
-	s.Conf.KeyDir = s.SecurePath
-	s.SSH = gitkit.NewSSH(s.Conf)
+	s.GitConf.KeyDir = s.SecurePath
+	s.SSH = gitkit.NewSSH(s.GitConf)
 	s.SSH.PublicKeyLookupFunc = s.LookupKey
 	if err := s.AssureGitIgnore(); err != nil {
 		return nil, err
@@ -133,16 +134,11 @@ func NewGitSAMTunnel(host, port string) (*GitSAMTunnel, error) {
 //NewGitSAMTunnelFromOptions makes a new SAM forwarder with default options, accepts host:port arguments
 func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunnel, error) {
 	var s GitSAMTunnel
-	var err error
-	s.SAMForwarder, err = samforwarder.NewSAMForwarderFromOptions()
-	if err != nil {
-		return nil, err
-	}
-	s.OptPage, err = eephttpd.NewEepHttpdFromOptions()
-	if err != nil {
-		return nil, err
-	}
-	s.Conf = gitkit.Config{}
+	s.SAMForwarder = &samforwarder.SAMForwarder{}
+	s.Conf = &i2ptunconf.Conf{}
+	s.OptPage = &eephttpd.EepHttpd{}
+	s.OptPage.Conf = &i2ptunconf.Conf{}
+	s.GitConf = gitkit.Config{}
 	s.SSH = &gitkit.SSH{}
 	log.Println("Initializing gitsam")
 	for _, o := range opts {
