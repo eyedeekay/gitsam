@@ -168,14 +168,11 @@ func (f *GitSAMTunnel) Close() error {
 
 func (s *GitSAMTunnel) Load() (samtunnel.SAMTunnel, error) {
 	if !s.Up() {
-		log.Println("Started putting tunnel up")
+		log.Println("Started putting tunnel up", s.Conf.SaveDirectory)
 	}
 	f, e := s.SAMForwarder.Load()
 	if e != nil {
 		return nil, e
-	}
-	if s.SecurePath == "" {
-		s.SecurePath = filepath.Dir(s.GitConf.Dir)
 	}
 	s.Conf.ServeDirectory = s.GitConf.Dir
 	s.SAMForwarder = f.(*samforwarder.SAMForwarder)
@@ -217,10 +214,17 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 	}
 	s.SAMForwarder.Config().SaveFile = true
 	var err error
+    if s.SecurePath == s.GitConf.Dir {
+		s.SecurePath = filepath.Dir(s.GitConf.Dir) + "/.gitsam_secure"
+        s.SAMForwarder.Config().SaveDirectory = s.SecurePath
+        s.SAMForwarder.Config().FilePath = s.SecurePath
+	}
 	conf := *s.Conf
 	conf.CloseIdleTime = 6000000
 	conf.TargetPort = s.PagePort
 	conf.TunName = s.ID() + "-eephttpd"
+    conf.SaveDirectory = s.Conf.SaveDirectory
+    log.Println("Setting up secure path", s.Conf.SaveDirectory, conf.SaveDirectory)
 	if s.OptPage, err = i2ptunhelper.NewEepHttpdFromConf(&conf); err != nil {
 		return nil, err
 	}

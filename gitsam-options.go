@@ -39,6 +39,7 @@ func SetSecurePath(s string) func(*GitSAMTunnel) error {
 		if c.SecurePath, err = filepath.Abs(s); err != nil {
 			return err
 		}
+		c.SAMForwarder.Config().SaveDirectory = c.SecurePath
 		return nil
 	}
 }
