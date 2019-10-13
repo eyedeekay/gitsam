@@ -2,6 +2,7 @@ package gitsam
 
 import (
 	"fmt"
+    "os"
 	"path/filepath"
 	"strconv"
 )
@@ -476,7 +477,9 @@ func SetKeyFile(s string) func(*GitSAMTunnel) error {
 		if c.SAMForwarder.Config().KeyFilePath, err = filepath.Abs(s); err != nil {
 			return err
 		}
-		// c.OptPage.Config().KeyFilePath = s
+        if err = os.MkdirAll(c.SAMForwarder.Config().KeyFilePath); err != nil {
+            return err
+        }
 		return nil
 	}
 }
