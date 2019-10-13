@@ -12,11 +12,11 @@ require (
 	github.com/cryptix/go v1.5.0 // indirect
 	github.com/d5/tengo v1.24.3
 	github.com/eyedeekay/checki2cp v0.0.0-20190711025647-bb48a7ebe468
-	github.com/eyedeekay/eephttpd v0.0.5
+	github.com/eyedeekay/eephttpd v0.0.6
 	github.com/eyedeekay/go-i2cp v0.0.0-20190716135428-6d41bed718b0
 	github.com/eyedeekay/outproxy v0.0.0-20190913044809-33f1668ccb7d // indirect
 	github.com/eyedeekay/ramp v0.0.0-20190429201811-305b382042ab
-	github.com/eyedeekay/sam-forwarder v0.32.082
+	github.com/eyedeekay/sam-forwarder v0.32.0
 	github.com/eyedeekay/sam3 v0.0.0-20190730185140-f8d54526ea25
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/gliderlabs/ssh v0.2.2
