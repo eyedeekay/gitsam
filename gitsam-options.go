@@ -488,7 +488,10 @@ func SetAccessList(s []string) func(*GitSAMTunnel) error {
 //SetKeyFile sets
 func SetKeyFile(s string) func(*GitSAMTunnel) error {
 	return func(c *GitSAMTunnel) error {
-		c.SAMForwarder.Config().KeyFilePath = s
+		var err error
+		if c.SAMForwarder.Config().KeyFilePath, err = filepath.Abs(s); err != nil {
+			return err
+		}
 		// c.OptPage.Config().KeyFilePath = s
 		return nil
 	}
