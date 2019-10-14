@@ -85,7 +85,6 @@ func (s *GitSAMTunnel) AssurePostRecieve() error {
     }
 	for _, dir := range files {
 		info, err := os.Stat(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"))
-        log.Println("checking", filepath.Join(s.GitConf.Dir, dir.Name(), ".git"))
 		if err == nil {
 			if info.IsDir() {
                 log.Println(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"), "is a directory")
