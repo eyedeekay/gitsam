@@ -1,23 +1,32 @@
 #! /usr/bin/env sh
 
-GH="github.com/"
-UN="eyedeekay"
-GO111MODULE=off
-GOPATH=$(pwd)/go
-mkdir -p $GOPATH
-GIT_REPOS="$GH$UN/gitsam/gitsam
-$GH$UN/eephttpd/eephttpd
-$GH$UN/sam-forwarder/samcatd
+export SCRIPTDIR=$(dirname $(readlink -f "$0"))
+
+. $SCRIPTDIR/.config
+export CONTENT=$SCRIPTDIR/$UN
+
+GIT_REPOS="$GH$UN/gitsam
+$GH$UN/eephttpd
+$GH$UN/sam-forwarder
 $GH$UN/goSam
-$GH$UN/httptunnel/httpproxy
-$GH$UN/httptunnel/multiproxy/browserproxy
+$GH$UN/httptunnel
 $GH$UN/udptunnel
 $GH$UN/checki2cp
 $GH$UN/sam3
-$GH$UN/outproxy/outproxy"
+$GH$UN/outproxy"
+
+mkdir -p "$CONTENT" $SCRIPTDIR/.gitsam_secure
+cd "$CONTENT"
 
 for x in $GIT_REPOS; do
-    go get -u $x
+    THEDIR=$CONTENT$(echo "$x" | sed "s|$GH$UN/||g")
+    mkdir -p $(echo "$x" | sed "s|$GH$UN/||g")
+    git clone "$x" $THEDIR/ 2>&1 | grep -v fatal
+    cd $THEDIR
+    pwd
+    git fetch --force --all --keep --update-head-ok --progress
+    git update-server-info -f && echo "updated server info"
+    cd "$CONTENT"
 done
 
-./run.sh
+$SCRIPTDIR/run.sh

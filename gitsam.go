@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-    "os/exec"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -38,7 +38,13 @@ var err error
 
 func (s *GitSAMTunnel) PRBytes() []byte {
 	r := "#!/bin/sh"
-	r += "GIT_WORK_TREE=" + s.GitConf.Dir + " git checkout -f"
+	r += "GIT_WORK_TREE=" + s.GitConf.Dir + " git checkout -f\n"
+	return []byte(r)
+}
+
+func (s *GitSAMTunnel) PUBytes() []byte {
+	r := "#!/bin/sh"
+	r += "GIT_WORK_TREE=" + s.GitConf.Dir + " git update-server-info -f\n"
 	return []byte(r)
 }
 
@@ -53,70 +59,88 @@ func FileExists(filename string) bool {
 	return false
 }
 
-func (s *GitSAMTunnel) ListDirs() ([]os.FileInfo, error){
-    unclassedfiles, err := ioutil.ReadDir(s.GitConf.Dir)
+func (s *GitSAMTunnel) ListDirs() ([]os.FileInfo, error) {
+	unclassedfiles, err := ioutil.ReadDir(s.GitConf.Dir)
 	if err != nil {
 		return nil, err
 	}
-    var directories []os.FileInfo
-    for _, unclassedfile := range unclassedfiles {
-        if unclassedfile.IsDir() {
-            log.Println("FoundDir", unclassedfile.Name())
-            directories = append(directories, unclassedfile)
-        }
-    }
+	var directories []os.FileInfo
+	for _, unclassedfile := range unclassedfiles {
+		if unclassedfile.IsDir() {
+			log.Println("FoundDir", unclassedfile.Name())
+			directories = append(directories, unclassedfile)
+		}
+	}
 	gitdir, err := os.Stat(s.GitConf.Dir)
 	if err != nil {
 		return nil, err
 	}
-    if gitdir.IsDir() {
-        directories = append(directories, gitdir)
-    }
-    return directories, nil
+	if gitdir.IsDir() {
+		directories = append(directories, gitdir)
+	}
+	return directories, nil
 }
 
 func (s *GitSAMTunnel) AssurePostRecieve() error {
 	if !s.page {
 		return nil
 	}
-    files, err := s.ListDirs()
-    if err != nil {
-        return err
-    }
+	files, err := s.ListDirs()
+	if err != nil {
+		return err
+	}
 	for _, dir := range files {
 		info, err := os.Stat(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"))
 		if err == nil {
 			if info.IsDir() {
-                log.Println(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"), "is a directory")
-                dirpath := filepath.Join(s.GitConf.Dir, dir.Name())
-                if strings.HasSuffix(s.GitConf.Dir, dir.Name()){
-                    dirpath = s.GitConf.Dir
-                }
+				log.Println(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"), "is a directory")
+				dirpath := filepath.Join(s.GitConf.Dir, dir.Name())
+				if strings.HasSuffix(s.GitConf.Dir, dir.Name()) {
+					dirpath = s.GitConf.Dir
+				}
 
-                cmd := exec.Command("git", "update-server-info")
-                cmd.Dir = dirpath
-                if err := cmd.Run(); err != nil {
-                    return err
-                }
-                log.Println("Updated git server info for static copy", cmd.Dir)
-				if err := os.MkdirAll(filepath.Join(s.GitConf.Dir, "/hooks"), 0755); err != nil {
+				cmd := exec.Command("git", "update-server-info")
+				cmd.Dir = dirpath
+				cmd.Env = []string{"GIT_WORK_TREE=" + dirpath}
+				if err := cmd.Run(); err != nil {
+					return err
+				}
+				log.Println("Updated git server info for static copy", cmd.Dir)
+				if err := os.MkdirAll(filepath.Join(s.GitConf.Dir, dir.Name(), "/hooks"), 0755); err != nil {
 					return err
 				} else {
 					if !FileExists(filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-recieve")) {
-						if err := ioutil.WriteFile(filepath.Join(s.GitConf.Dir, "hooks", "post-recieve"), s.PRBytes(), 0755); err != nil {
+						log.Println("The hooks file did not exist, creating one", filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-recieve"))
+						if err := ioutil.WriteFile(filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-recieve"), s.PRBytes(), 0755); err != nil {
 							s.prex = true
 							return err
+						} else {
+							log.Println("Created the hooks file:", filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-recieve"))
 						}
+					} else {
+						log.Println("hooks file", filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-recieve"), "Already exists, leaving it alone")
+					}
+					if !FileExists(filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-update")) {
+						log.Println("The hooks file did not exist, creating one", filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-update"))
+						if err := ioutil.WriteFile(filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-update"), s.PUBytes(), 0755); err != nil {
+							s.prex = true
+							return err
+						} else {
+							log.Println("Created the hooks file:", filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-update"))
+						}
+					} else {
+						log.Println("hooks file", filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-update"), "Already exists, leaving it alone")
 					}
 				}
-			}else{
-                log.Println(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"), "is not a directory")
-            }
-		}else if os.IsNotExist(err) {
-            log.Println(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"), "does not exist")
-        }else{
-            return err
-        }
+
+			} else {
+				log.Println(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"), "is not a directory")
+			}
+		} else if os.IsNotExist(err) {
+			log.Println(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"), "does not exist")
+		} else {
+			return err
+		}
 	}
 	return nil
 }

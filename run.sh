@@ -1,9 +1,8 @@
 #! /usr/bin/env sh
 
-GO111MODULE=off
-GOPATH=$(pwd)/go
+export SCRIPTDIR=$(dirname $(readlink -f "$0"))
 
-cd go/src/github.com/eyedeekay
-cp ~/.ssh/github_id_rsa.pub ./id_rsa.pub
-mkdir -p ../.gitsam_secure/
-$GOPATH/bin/gitsam 2>&1 | tee gitsam.log
+. $SCRIPTDIR/.config
+export CONTENT=$SCRIPTDIR/$UN
+
+cd "$CONTENT" && $SCRIPTDIR/gitsam/gitsam
