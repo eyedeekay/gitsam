@@ -56,23 +56,51 @@ func (s *GitSAMTunnel) AssurePostRecieve() error {
 	if !s.page {
 		return nil
 	}
-	if err := os.MkdirAll(s.GitConf.Dir+"/hooks", 0755); err != nil {
+	files, err := ioutil.ReadDir(s.GitConf.Dir)
+	if err != nil {
 		return err
-	} else {
-		if !FileExists(s.GitConf.Dir + "/hooks/post-recieve") {
-			if err := ioutil.WriteFile(s.GitConf.Dir+"/hooks/post-recieve", s.PRBytes(), 0755); err != nil {
-				s.prex = true
-				return err
+	}
+	gitdir, err := os.Stat(s.GitConf.Dir)
+	if err != nil {
+		return err
+	}
+	files = append(files, gitdir)
+	for _, dir := range files {
+		info, err := os.Stat(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"))
+		if err == nil {
+			if info.IsDir() {
+				if err := os.MkdirAll(filepath.Join(s.GitConf.Dir, "/hooks"), 0755); err != nil {
+					return err
+				} else {
+					if !FileExists(filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-recieve")) {
+						if err := ioutil.WriteFile(filepath.Join(s.GitConf.Dir, "hooks", "post-recieve"), s.PRBytes(), 0755); err != nil {
+							s.prex = true
+							return err
+						}
+					}
+					return nil
+				}
 			}
 		}
-		return nil
 	}
+	return nil
 }
 
 func (s *GitSAMTunnel) DeletePostRecieve() error {
 	if s.prex {
-		if err := os.Remove(s.GitConf.Dir + "/hooks/post-recieve"); err != nil {
+		files, err := ioutil.ReadDir(s.GitConf.Dir)
+		if err != nil {
 			return err
+		}
+		gitdir, err := os.Stat(s.GitConf.Dir)
+		if err != nil {
+			return err
+		}
+		files = append(files, gitdir)
+		for _, dir := range files {
+			if err := os.Remove(filepath.Join(s.GitConf.Dir, dir.Name(), "hooks", "post-recieve")); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -84,10 +112,10 @@ func (s *GitSAMTunnel) AssureGitIgnore() error {
 		return err
 	}
 	if filepath.Dir(s.PubKeyPath) == s.GitConf.Dir {
-		if FileExists(s.GitConf.Dir + "/.gitignore") {
-			if bytes, err := ioutil.ReadFile(s.GitConf.Dir + "/.gitignore"); err == nil {
+		if FileExists(filepath.Join(s.GitConf.Dir, "/.gitignore")) {
+			if bytes, err := ioutil.ReadFile(filepath.Join(s.GitConf.Dir, "/.gitignore")); err == nil {
 				if !strings.Contains(string(bytes), s.PubKeyPath) {
-					f, err := os.OpenFile(s.GitConf.Dir+"/.gitignore", os.O_APPEND|os.O_WRONLY, 0644)
+					f, err := os.OpenFile(filepath.Join(s.GitConf.Dir, "/.gitignore"), os.O_APPEND|os.O_WRONLY, 0644)
 					if err != nil {
 						return err
 					}
@@ -100,7 +128,7 @@ func (s *GitSAMTunnel) AssureGitIgnore() error {
 				return err
 			}
 		} else {
-			if err := ioutil.WriteFile(s.GitConf.Dir+"/.gitignore", []byte(PubKeyPath), 0644); err != nil {
+			if err := ioutil.WriteFile(filepath.Join(s.GitConf.Dir, "/.gitignore"), []byte(PubKeyPath), 0644); err != nil {
 				return err
 			}
 		}
@@ -214,22 +242,22 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 	}
 	s.SAMForwarder.Config().SaveFile = true
 	var err error
-    if s.SecurePath == s.GitConf.Dir {
+	if s.SecurePath == s.GitConf.Dir {
 		s.SecurePath = filepath.Dir(s.GitConf.Dir) + "/.gitsam_secure"
-        s.SAMForwarder.Config().SaveDirectory = s.SecurePath
-        s.SAMForwarder.Config().FilePath = s.SecurePath
+		s.SAMForwarder.Config().SaveDirectory = s.SecurePath
+		s.SAMForwarder.Config().FilePath = s.SecurePath
 	}
 	conf := *s.Conf
 	conf.CloseIdleTime = 6000000
 	conf.TargetPort = s.PagePort
 	conf.TunName = s.ID() + "-eephttpd"
-    conf.SaveDirectory = s.Conf.SaveDirectory
-    log.Println("Setting up secure path", s.Conf.SaveDirectory, conf.SaveDirectory)
+	conf.SaveDirectory = s.Conf.SaveDirectory
+	log.Println("Setting up secure path", s.Conf.SaveDirectory, conf.SaveDirectory)
 	if s.OptPage, err = i2ptunhelper.NewEepHttpdFromConf(&conf); err != nil {
 		return nil, err
 	}
 	l, e := s.Load()
-    //log.Println("Options loaded", s.Print())
+	//log.Println("Options loaded", s.Print())
 	if e != nil {
 		return nil, e
 	}
