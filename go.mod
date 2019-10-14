@@ -9,7 +9,7 @@ require (
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/d5/tengo v1.24.3
 	github.com/eyedeekay/checki2cp v0.0.0-20190711025647-bb48a7ebe468
-	github.com/eyedeekay/eephttpd v0.0.92
+	github.com/eyedeekay/eephttpd v0.0.94
 	github.com/eyedeekay/go-i2cp v0.0.0-20190716135428-6d41bed718b0
 	github.com/eyedeekay/ramp v0.0.0-20190429201811-305b382042ab
 	github.com/eyedeekay/sam-forwarder v0.32.1-0.20190928041036-d2f767dbe008
