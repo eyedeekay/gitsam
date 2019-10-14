@@ -6,6 +6,7 @@ require (
 	crawshaw.io/littleboss v0.0.0-20190317185602-8957d0aedcce
 	github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
+	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/d5/tengo v1.24.3
 	github.com/eyedeekay/checki2cp v0.0.0-20190711025647-bb48a7ebe468
 	github.com/eyedeekay/eephttpd v0.0.8

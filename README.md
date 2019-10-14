@@ -9,6 +9,9 @@ This is still pretty much a toy. I made it as a goof after I got tired this
 Saturday. I do intend to refine it as I get more chances to do so but for now
 it's just for fun.
 
+The versions don't mean anything. I have to increment when I update go mod and I
+broke it at first.
+
 This simple application combines an I2P Tunnel created by sam-forwarder and a
 git repository created by gitkit in order to simply host a group of Git
 repositories over the I2P network. It creates two tunnels to serve groups of
