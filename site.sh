@@ -24,7 +24,7 @@ for x in $GIT_REPOS; do
     git clone "$x" $THEDIR/ 2>&1 | grep -v fatal
     cd $THEDIR
     pwd
-    git fetch --force --all --keep --update-head-ok --progress
+    git pull --force --all --keep --update-head-ok --progress
     git update-server-info -f && echo "updated server info"
     cd "$CONTENT"
 done
