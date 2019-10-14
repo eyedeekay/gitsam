@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+    "os/exec"
 	"path/filepath"
 	"strings"
 
@@ -69,6 +70,16 @@ func (s *GitSAMTunnel) AssurePostRecieve() error {
 		info, err := os.Stat(filepath.Join(s.GitConf.Dir, dir.Name(), ".git"))
 		if err == nil {
 			if info.IsDir() {
+                dirpath := filepath.Join(s.GitConf.Dir, dir.Name())
+                if strings.HasSuffix(s.GitConf.Dir, dir.Name()){
+                    dirpath = s.GitConf.Dir
+                }
+                log.Println(dirpath)
+                cmd := exec.Command("git", "update-server-info")
+                cmd.Dir = dirpath
+                if err := cmd.Run(); err != nil {
+                    return err
+                }
 				if err := os.MkdirAll(filepath.Join(s.GitConf.Dir, "/hooks"), 0755); err != nil {
 					return err
 				} else {
