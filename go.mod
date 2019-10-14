@@ -11,7 +11,7 @@ require (
 	github.com/eyedeekay/eephttpd v0.0.8
 	github.com/eyedeekay/go-i2cp v0.0.0-20190716135428-6d41bed718b0
 	github.com/eyedeekay/ramp v0.0.0-20190429201811-305b382042ab
-	github.com/eyedeekay/sam-forwarder v0.0.0-20190928041036-d2f767dbe008
+	github.com/eyedeekay/sam-forwarder v0.32.1-0.20190928041036-d2f767dbe008
 	github.com/eyedeekay/sam3 v0.0.0-20190730185140-f8d54526ea25
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/gliderlabs/ssh v0.2.2
