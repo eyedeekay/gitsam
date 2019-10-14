@@ -19,7 +19,7 @@ mkdir -p "$CONTENT" $SCRIPTDIR/.gitsam_secure
 cd "$CONTENT"
 
 for x in $GIT_REPOS; do
-    THEDIR=$CONTENT$(echo "$x" | sed "s|$GH$UN/||g")
+    THEDIR=$CONTENT/$(echo "$x" | sed "s|$GH$UN/||g")
     mkdir -p $(echo "$x" | sed "s|$GH$UN/||g")
     git clone "$x" $THEDIR/ 2>&1 | grep -v fatal
     cd $THEDIR
