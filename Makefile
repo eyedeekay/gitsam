@@ -1,6 +1,7 @@
 
 build:
 	cd gitsam && go build
+	cp ./gitsam/gitsam ./go/bin/gitsam
 
 try: build
 	./gitsam/gitsam
