@@ -9,7 +9,7 @@ require (
 	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/d5/tengo v1.24.3
 	github.com/eyedeekay/checki2cp v0.0.0-20190711025647-bb48a7ebe468
-	github.com/eyedeekay/eephttpd v0.0.8
+	github.com/eyedeekay/eephttpd v0.0.91
 	github.com/eyedeekay/go-i2cp v0.0.0-20190716135428-6d41bed718b0
 	github.com/eyedeekay/ramp v0.0.0-20190429201811-305b382042ab
 	github.com/eyedeekay/sam-forwarder v0.32.1-0.20190928041036-d2f767dbe008
@@ -34,4 +34,5 @@ require (
 	golang.org/x/net v0.0.0-20191011234655-491137f69257
 	golang.org/x/sys v0.0.0-20191010194322-b09406accb47
 	golang.org/x/text v0.3.2
+	gopkg.in/src-d/go-git.v4 v4.13.1 // indirect
 )
