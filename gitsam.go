@@ -311,6 +311,7 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 	conf.TargetPort = s.PagePort
 	conf.TunName = s.ID() + "-eephttpd"
 	conf.SaveDirectory = s.Conf.SaveDirectory
+    conf.Type = "server"
 	log.Println("Setting up secure path", s.Conf.SaveDirectory, conf.SaveDirectory)
 	if s.OptPage, err = i2ptunhelper.NewEepHttpdFromConf(&conf); err != nil {
 		return nil, err

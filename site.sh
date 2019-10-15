@@ -16,17 +16,19 @@ $GH$UN/sam3
 $GH$UN/outproxy"
 
 mkdir -p "$CONTENT" $SCRIPTDIR/.gitsam_secure
-cd "$CONTENT"
+cd "$CONTENT" && pwd
 
 for x in $GIT_REPOS; do
     THEDIR=$CONTENT/$(echo "$x" | sed "s|$GH$UN/||g")
-    mkdir -p $(echo "$x" | sed "s|$GH$UN/||g")
-    git clone "$x" $THEDIR/ 2>&1 | grep -v fatal
+    echo $THEDIR
+    mkdir -p $THEDIR
+    git clone --mirror "$x" 2>&1 | grep -v fatal
     cd $THEDIR
-    pwd
-    git pull --force --all --keep --update-head-ok --progress
+    pwd && echo "$CONTENT/$THEDIR.git"
+    git init --separate-git-dir="$THEDIR.git"
+    git checkout -f
+    git fetch --force --all --keep --progress --update-head-ok --tags
     git update-server-info -f && echo "updated server info"
+    git fsck
     cd "$CONTENT"
 done
-
-$SCRIPTDIR/run.sh
