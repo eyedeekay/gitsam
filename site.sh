@@ -24,9 +24,10 @@ for x in $GIT_REPOS; do
     mkdir -p $THEDIR
     git clone --mirror "$x" 2>&1 | grep -v fatal
     cd $THEDIR
-    pwd && echo "$CONTENT/$THEDIR.git"
-    git init --separate-git-dir="$THEDIR.git"
+    pwd && ls "$THEDIR/.git"
+    git init
     git checkout -f
+    git checkout -b pages
     git fetch --force --all --keep --progress --update-head-ok --tags
     git update-server-info -f && echo "updated server info"
     git fsck

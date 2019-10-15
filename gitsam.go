@@ -38,7 +38,10 @@ var err error
 
 func (s *GitSAMTunnel) PRBytes() []byte {
 	r := "#!/bin/sh"
-	r += "GIT_WORK_TREE=" + s.GitConf.Dir + " git checkout -f\n"
+	r += "GIT_WORK_TREE=" + s.GitConf.Dir + " git checkout -f master\n"
+	r += "GIT_WORK_TREE=" + s.GitConf.Dir + " git branch -D pages\n"
+	r += "GIT_WORK_TREE=" + s.GitConf.Dir + " git checkout -f pages\n"
+	r += "GIT_WORK_TREE=" + s.GitConf.Dir + " git merge origin/master\n"
 	return []byte(r)
 }
 
@@ -99,7 +102,14 @@ func (s *GitSAMTunnel) AssurePostRecieve() error {
 					dirpath = s.GitConf.Dir
 				}
 
-				cmd := exec.Command("git", "update-server-info")
+				cmd := exec.Command("git", "checkout", "-b", "pages")
+				cmd.Dir = dirpath
+				cmd.Env = []string{"GIT_WORK_TREE=" + dirpath}
+				if err := cmd.Run(); err != nil {
+					log.Println(err)
+				}
+				log.Println("checked out page branch for static copy", cmd.Dir)
+				cmd = exec.Command("git", "update-server-info")
 				cmd.Dir = dirpath
 				cmd.Env = []string{"GIT_WORK_TREE=" + dirpath}
 				if err := cmd.Run(); err != nil {
@@ -187,7 +197,7 @@ func (s *GitSAMTunnel) AssureGitIgnore() error {
 				return err
 			}
 		} else {
-			if err := ioutil.WriteFile(filepath.Join(s.GitConf.Dir, "/.gitignore"), []byte(PubKeyPath), 0644); err != nil {
+			if err := ioutil.WriteFile(filepath.Join(s.GitConf.Dir, "/.gitignore"), []byte(PubKeyPath+"\n"), 0644); err != nil {
 				return err
 			}
 		}
@@ -197,6 +207,16 @@ func (s *GitSAMTunnel) AssureGitIgnore() error {
 
 func (f *GitSAMTunnel) LookupKey(content string) (*gitkit.PublicKey, error) {
 	textkey, err := ioutil.ReadFile(f.PubKeyPath)
+	log.Println("This is the content\n", content, "\n", string(textkey))
+	if !strings.HasPrefix(string(textkey), content) {
+		log.Println(
+			"\nContent:",
+			content,
+			"\nTextKey:",
+			string(textkey),
+		)
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -306,12 +326,13 @@ func NewGitSAMTunnelFromOptions(opts ...func(*GitSAMTunnel) error) (*GitSAMTunne
 		s.SAMForwarder.Config().SaveDirectory = s.SecurePath
 		s.SAMForwarder.Config().FilePath = s.SecurePath
 	}
+	s.GitConf.Auth = true
 	conf := *s.Conf
 	conf.CloseIdleTime = 6000000
 	conf.TargetPort = s.PagePort
 	conf.TunName = s.ID() + "-eephttpd"
 	conf.SaveDirectory = s.Conf.SaveDirectory
-    conf.Type = "server"
+	conf.Type = "server"
 	log.Println("Setting up secure path", s.Conf.SaveDirectory, conf.SaveDirectory)
 	if s.OptPage, err = i2ptunhelper.NewEepHttpdFromConf(&conf); err != nil {
 		return nil, err
