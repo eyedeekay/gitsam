@@ -20,4 +20,8 @@ mod:
 
 serve:
 	docker build -t eyedeekay/gitsam -f Dockerfile .
-	#docker run -itd --restart=always
+	docker run -itd \
+		--network=host \
+		--restart=always \
+		--name=gitsam \
+		eyedeekay/gitsam
