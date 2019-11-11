@@ -24,4 +24,5 @@ serve:
 		--network=host \
 		--restart=always \
 		--name=gitsam \
+		--volume gitsam:/var/www \
 		eyedeekay/gitsam
